@@ -1,0 +1,55 @@
+CREATE DATABASE CompanyDB;
+
+USE CompanyDB;
+
+CREATE TABLE Employee (
+    EmpID INT PRIMARY KEY,
+    EmpName VARCHAR(30),
+    Salary INT,
+    Bonus INT
+);
+
+INSERT INTO Employee VALUES
+(1,'Rahul',30000,0),
+(2,'Sneha',40000,0),
+(3,'Amit',50000,0);
+
+DELIMITER //
+
+CREATE PROCEDURE BonusProc()
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE id INT;
+    DECLARE sal INT;
+
+    DECLARE emp_cursor CURSOR FOR
+    SELECT EmpID, Salary FROM Employee;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND
+    SET done = 1;
+
+    OPEN emp_cursor;
+
+    read_loop: LOOP
+
+        FETCH emp_cursor INTO id, sal;
+
+        IF done = 1 THEN
+            LEAVE read_loop;
+        END IF;
+
+        UPDATE Employee
+        SET Bonus = sal * 10 / 100
+        WHERE EmpID = id;
+
+    END LOOP;
+
+    CLOSE emp_cursor;
+
+END //
+
+DELIMITER ;
+
+CALL BonusProc();
+
+SELECT * FROM Employee;
